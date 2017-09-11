@@ -6,6 +6,8 @@ This plugin is just a proof of concept. Do not use it.
 
 Install the plugin
 
+Execute `composer install`
+
 Define the following constants in `wp-config.php`:
 
 ```

@@ -39,27 +39,47 @@ function meetup_render_menu() {
 				<?php foreach ( $attendants as $attendant ): ?>
 					<li>
 						<?php echo $attendant->member->name ?> (<?php echo $attendant->member->id ?>)
-						<select name="" id="" class="member-attended" data-member="<?php echo $attendant->member->id; ?>" data-event="<?php echo $last_event->id ?>">
-							<option value="no">No</option>
-							<option <?php selected( meetup_member_attended( $attendant->member->id, $event->id ) ) ?> value="yes">Yes</option>
-						</select>
+						<a
+								href="#"
+								class="member-attended button"
+								<?php disabled( ! meetup_member_attended( $attendant->member->id, $event->id ) ) ?>
+								data-value="no"
+								data-member="<?php echo $attendant->member->id; ?>"
+								data-event="<?php echo $last_event->id ?>"
+						>
+							No
+						</a>
+						<a
+								href="#"
+								class="member-attended button"
+								<?php disabled( meetup_member_attended( $attendant->member->id, $event->id ) ) ?>
+								data-value="yes"
+								data-member="<?php echo $attendant->member->id; ?>"
+								data-event="<?php echo $last_event->id ?>"
+						>
+							Yes
+						</a>
 					</li>
 
 				<?php endforeach; ?>
 			</ul>
 
 			<script>
-                jQuery( '.member-attended' ).change( function( e ) {
-                    var value = jQuery( this ).val();
+                jQuery( '.member-attended' ).click( function( e ) {
+                    var value = jQuery( this ).data( 'value' );
+                    var siblings = jQuery( this ).siblings('.button');
+                    var self = this;
                     var data = {
                         action: 'meetup_set_attendance',
                         member_id: jQuery(this).data('member'),
                         event_id: jQuery(this).data('event'),
                         attended: ( 'yes' === value ) ? 1 : 0
                     };
+                    jQuery( self ).attr( 'disabled', true );
 
                     jQuery.post( ajaxurl, data, function() {
-                        console.log("DONE");
+                        siblings.removeAttr( 'disabled' );
+                        jQuery( self ).attr( 'disabled', true );
                     });
                 })
 			</script>
