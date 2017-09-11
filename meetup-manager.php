@@ -17,6 +17,22 @@ function meetup_render_menu() {
 
 	$event_id = isset( $_GET['event_id'] ) ? absint( $_GET['event_id'] ) : false;
 
+
+	if ( $event_id ) {
+		wp_enqueue_script( 'wp-util' );
+		$event = meetup_get_event( $event_id );
+		$attendants = meetup_get_event_attendants( $event_id );
+		foreach ( $attendants as $key => $attendant ) {
+			$attendants[ $key ]->attended = meetup_member_attended( $attendant->member->id, $event->id );
+		}
+
+		$data = array(
+			'attendants' => $attendants,
+			'event' => $event
+		);
+		wp_localize_script( 'wp-util', 'Meetup_Initial_Data', $data );
+	}
+
 	?>
 	<div class="wrap">
 		<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
@@ -32,59 +48,78 @@ function meetup_render_menu() {
 				<?php endforeach; ?>
 			</ul>
 		<?php else: ?>
-			<?php $event = meetup_get_event( $event_id ); ?>
-			<?php $attendants = meetup_get_event_attendants( $event_id ); ?>
+			<?php meetup_attendant_template(); ?>
 			<h4>Attendants</h4>
-			<ul>
-				<?php foreach ( $attendants as $attendant ): ?>
-					<li>
-						<?php echo $attendant->member->name ?> (<?php echo $attendant->member->id ?>)
-						<a
-								href="#"
-								class="member-attended button"
-								<?php disabled( ! meetup_member_attended( $attendant->member->id, $event->id ) ) ?>
-								data-value="no"
-								data-member="<?php echo $attendant->member->id; ?>"
-								data-event="<?php echo $last_event->id ?>"
-						>
-							No
-						</a>
-						<a
-								href="#"
-								class="member-attended button"
-								<?php disabled( meetup_member_attended( $attendant->member->id, $event->id ) ) ?>
-								data-value="yes"
-								data-member="<?php echo $attendant->member->id; ?>"
-								data-event="<?php echo $last_event->id ?>"
-						>
-							Yes
-						</a>
-					</li>
-
-				<?php endforeach; ?>
-			</ul>
+			<ul id="attendants"></ul>
 
 			<script>
-                jQuery( '.member-attended' ).click( function( e ) {
-                    var value = jQuery( this ).data( 'value' );
-                    var siblings = jQuery( this ).siblings('.button');
-                    var self = this;
-                    var data = {
-                        action: 'meetup_set_attendance',
-                        member_id: jQuery(this).data('member'),
-                        event_id: jQuery(this).data('event'),
-                        attended: ( 'yes' === value ) ? 1 : 0
-                    };
-                    jQuery( self ).attr( 'disabled', true );
+				jQuery(document).ready( function( $ ) {
+                    var attendantTemplate = wp.template( 'attendant' );
+                    var event = Meetup_Initial_Data.event;
+                    var list = $('#attendants');
+                    
+                    Meetup_Initial_Data.attendants.map( function( attendant ) {
+                        var data = {
+                            id: attendant.member.id,
+							name: attendant.member.name,
+							eventId: event.id,
+							attended: attendant.attended
+						};
+                        list.append( attendantTemplate( data ) );
+					});
+                    $( '#attendants .member-attended' ).click( function( e ) {
+                        var value = $( this ).data( 'value' );
+                        var siblings = $( this ).siblings('.button');
+                        var self = this;
+                        var data = {
+                            action: 'meetup_set_attendance',
+                            member_id: $(this).data('member'),
+                            event_id: $(this).data('event'),
+                            attended: ( 'yes' === value ) ? 1 : 0
+                        };
+                        $( self ).attr( 'disabled', true );
 
-                    jQuery.post( ajaxurl, data, function() {
-                        siblings.removeAttr( 'disabled' );
-                        jQuery( self ).attr( 'disabled', true );
-                    });
-                })
+                        $.post( ajaxurl, data, function(e) {
+                            siblings.removeAttr( 'disabled' );
+                            $( self ).attr( 'disabled', true );
+                            console.log(e);
+                        });
+                    })
+				});
+
 			</script>
 		<?php endif; ?>
 	</div>
+	<?php
+}
+
+function meetup_attendant_template() {
+	?>
+	<script type="text/html" id="tmpl-attendant">
+		<li>
+			{{ data.name }} ({{{ data.id }}})
+			<a
+				href="#"
+				class="member-attended button"
+				<# if ( ! data.attended ) { #> disabled="disabled" <# } #>
+				data-value="no"
+				data-member="{{{ data.id }}}"
+				data-event="{{{ data.eventId }}}"
+			>
+				No
+			</a>
+			<a
+				href="#"
+				class="member-attended button"
+				<# if ( data.attended ) { #> disabled="disabled" <# } #>
+				data-value="yes"
+				data-member="{{{ data.id }}}"
+				data-event="{{{ data.eventId }}}"
+			>
+				Yes
+			</a>
+		</li>
+	</script>
 	<?php
 }
 
@@ -94,6 +129,7 @@ add_action( 'wp_ajax_meetup_set_attendance', function() {
 	$event_id = absint( $_POST['event_id'] );
 
 	meetup_set_member_attendance( $member_id, $event_id, $value );
+	die();
 });
 
 function meetup_get_last_event() {
