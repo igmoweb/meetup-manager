@@ -4,7 +4,7 @@
  * Plugin Name: Meetup
  */
 
-//include_once( 'vendor/user3581488/meetup/meetup.php' );
+include_once( 'vendor/user3581488/meetup/meetup.php' );
 include_once( 'api.php' );
 
 add_action( 'admin_menu', function() {
@@ -77,7 +77,7 @@ add_action( 'wp_ajax_meetup_set_attendance', function() {
 });
 
 function meetup_get_last_event() {
-	$meetup = new Meetup( array( 'key' => MEETUP_API_KEY ) );
+	$meetup = new Meetup_Manager_API( array( 'key' => MEETUP_API_KEY ) );
 	try {
 		$event = $meetup->getEvents( array( 'urlname' => MEETUP_URL_NAME, 'scroll' => 'recent_past', 'page' => 1 ) );
 	}
@@ -89,7 +89,7 @@ function meetup_get_last_event() {
 }
 
 function meetup_get_events() {
-	$meetup = new Meetup( array( 'key' => MEETUP_API_KEY ) );
+	$meetup = new Meetup_Manager_API( array( 'key' => MEETUP_API_KEY ) );
 	try {
 		$events = $meetup->getEvents( array( 'urlname' => MEETUP_URL_NAME, 'page' => 3 ) );
 	}
@@ -102,7 +102,7 @@ function meetup_get_events() {
 
 
 function meetup_get_member( $member_id ) {
-	$meetup = new Meetup( array( 'key' => MEETUP_API_KEY ) );
+	$meetup = new Meetup_Manager_API( array( 'key' => MEETUP_API_KEY ) );
 	try {
 		$member = $meetup->getMember( array( 'id' => $member_id ) );
 	}
@@ -114,7 +114,7 @@ function meetup_get_member( $member_id ) {
 }
 
 function meetup_get_event( $event_id ) {
-	$meetup = new Meetup( array( 'key' => MEETUP_API_KEY ) );
+	$meetup = new Meetup_Manager_API( array( 'key' => MEETUP_API_KEY ) );
 	try {
 		$event = $meetup->getEvent( array( 'urlname' => MEETUP_URL_NAME, 'id' => $event_id ) );
 	}
@@ -126,7 +126,7 @@ function meetup_get_event( $event_id ) {
 }
 
 function meetup_get_event_attendants( $event_id ) {
-	$meetup = new Meetup( array( 'key' => MEETUP_API_KEY ) );
+	$meetup = new Meetup_Manager_API( array( 'key' => MEETUP_API_KEY ) );
 	try {
 		$member = $meetup->getEventAttendants( array( 'urlname' => MEETUP_URL_NAME, 'id' => $event_id ) );
 	}

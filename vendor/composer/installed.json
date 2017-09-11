@@ -1,0 +1,14 @@
+[
+    {
+        "name": "user3581488/meetup",
+        "version": "master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "git@github.com:user3581488/Meetup.git",
+            "reference": "master"
+        },
+        "type": "library",
+        "installation-source": "source"
+    }
+]

@@ -1,0 +1,24 @@
+{
+    "name": "ignacio/meetup",
+    "authors": [
+        {
+            "name": "igmoweb",
+            "email": "igmoweb@gmail.com"
+        }
+    ],
+    "repositories": [{
+        "type": "package",
+        "package": {
+            "name": "user3581488/meetup",
+            "version": "master",
+            "source": {
+                "url": "git@github.com:user3581488/Meetup.git",
+                "type": "git",
+                "reference": "master"
+            }
+        }
+    }],
+    "require": {
+        "user3581488/meetup": "dev-master"
+    }
+}
